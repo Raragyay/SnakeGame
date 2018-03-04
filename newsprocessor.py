@@ -18,11 +18,11 @@ def news_scraper(soup, sitename, stories):
     :param stories: Stories that we already have. In the form of a dictionary {header:link}
     :return: We return that stories, but with some extra links. 
     """
-    newsclass = websites[sitename]
-    news_stories = soup.find_all(newsclass['block'], {'class': newsclass['classname']})
+    news_params = websites[sitename]
+    news_stories = soup.find_all(news_params['block'], {'class': news_params['class_name']})
     foundnews = False
     for news_block in news_stories:
-        header = news_block.find('h3').string
+        header = news_block.find(news_params['header'], {'class': news_params['header_class']}).text.strip()
         if header in stories or not header:
             continue
         else:
@@ -38,12 +38,16 @@ def news_scraper(soup, sitename, stories):
 websites = {
     'BBC': {
         'block': 'div',
-        'classname': 'gs-c-promo',
+        'class_name': 'gs-c-promo',
+        'header': 'h3',
+        'header_class': 'gs-c-promo-heading__title',
         'baseurl': 'http://www.bbc.com/news'
     },
-    'CNN': {
-        'block': 'article',
-        'classname': 'cd',
-        'baseurl': 'https://www.cnn.com'
+    'Sky News': {
+        'block': 'div',
+        'class_name': 'sdc-news-story-grid__card',
+        'header': 'h3',
+        'header_class': 'sdc-news-story-grid__headline',
+        'baseurl': 'https://news.sky.com/'
     }
 }

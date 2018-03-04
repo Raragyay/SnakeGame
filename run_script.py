@@ -32,18 +32,18 @@ def loader(filename):
     try:
         with open('{}.txt'.format(filename), 'r') as read:
             stories = json.load(read)
-    except json.decoder.JSONDecodeError:
+    except (json.decoder.JSONDecodeError, FileNotFoundError):
         return {}
     return stories
 
 
 urls = {
     'BBC': 'http://www.bbc.com/news',
-    'CNN': 'http://www.cnn.com/news'
+    'Sky News': 'https://news.sky.com/'
 }
 try:
-    t1 = threading.Thread(target=check_news_site, args=('BBC'))
-    t2 = threading.Thread(target=check_news_site, args=('CNN'))
+    t1 = threading.Thread(target=check_news_site, args=('BBC',))
+    t2 = threading.Thread(target=check_news_site, args=('Sky News',))
 
     t1.start()
     print('Started first thread.')

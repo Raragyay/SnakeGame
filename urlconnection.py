@@ -6,7 +6,10 @@ from custom_exceptions import DisallowedConnection
 
 def isolatebaseurl(url):
     urlperiod = url.index('.')
-    urlfirstslash = url[urlperiod:].index('/')
+    try:
+        urlfirstslash = url[urlperiod:].index('/')
+    except ValueError:
+        return url
     return url[:urlfirstslash + urlperiod]
 
 
