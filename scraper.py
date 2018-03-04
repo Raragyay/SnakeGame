@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
-import pprint
 import pandas as pd
+from custom_exceptions import DisallowedConnection
 
 pd.set_option('expand_frame_repr', False)
 
@@ -51,10 +51,14 @@ def allowed_bots(website):
 def site_dict(urllist):
     sitedict = {}
     for site in urllist:
-        website = establish_connection(site + '/robots.txt', urllist)
-        if website:
-            allowed, disallowed = allowed_bots(website)
-            sitedict.update({site: {'allowed': allowed, 'disallowed': disallowed}})
+        try:
+            website = establish_connection(site, urllist)
+        except DisallowedConnection as e:
+            print('Connection to {} not allowed with HTTP code {}. Does its robots.txt allow access?'.format(site,
+                                                                                                             e.status))
+            continue
+        allowed, disallowed = allowed_bots(website)
+        sitedict.update({site: {'allowed': allowed, 'disallowed': disallowed}})
     return sitedict
 
 
@@ -83,6 +87,7 @@ def get_players(table, initials, teams):
     df.reset_index(drop=True, inplace=True)
     df.index += 1
     print(df)
+    print(df.describe())
 
 
 urls = [
@@ -95,11 +100,11 @@ urls = [
 dataurls = [
     'https://www.fantasypros.com/nfl/rankings/consensus-cheatsheets.php'
 ]
-for url in urls:
-    website = establish_connection(url, urls)
-    if website:
-        soup = BeautifulSoup(website.text, 'html.parser')
-        pprint.pprint(parse_urls(soup))
+# for url in urls:
+#    website = establish_connection(url, urls)
+#    if website:
+#        soup = BeautifulSoup(website.text, 'html.parser')
+#        pprint.pprint(parse_urls(soup))
 
 for url in dataurls:
     website = establish_connection(url, dataurls)
@@ -112,7 +117,7 @@ for url in dataurls:
             link = player.find('a', href=True)
             if 'teams' in link.get('href'):  # That's not a player, that's a team!
                 player.decompose()
-            else:
+            else:  # If it's not an imposter, then I delete the initials and team names, and move them to a seperate list to be inserted later on.
                 initials = player.find('span', {'class': 'short-name'})
                 team = player.find('small', {'class': 'grey'})
                 initialslist.append(initials.string)
