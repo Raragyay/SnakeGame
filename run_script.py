@@ -39,19 +39,18 @@ def loader(filename):
 
 urls = {
     'BBC': 'http://www.bbc.com/news',
-    'Sky News': 'https://news.sky.com/'
+    'Sky News': 'https://news.sky.com/',
+    'The Guardian': 'https://www.theguardian.com/international'
 }
 try:
-    t1 = threading.Thread(target=check_news_site, args=('BBC',))
-    t2 = threading.Thread(target=check_news_site, args=('Sky News',))
-
-    t1.start()
-    print('Started first thread.')
-    t2.start()
-    print('Started second thread')
-
-    t1.join()
-    t2.join()
+    threads = []
+    for key in urls:
+        threads.append(threading.Thread(target=check_news_site, args=(key,)))
+    for index, thread in enumerate(threads):
+        thread.start()
+        print('Started thread {}'.format(index + 1))
+    for thread in threads:
+        thread.join()
     print('Exiting Main Thread.')
 except DisallowedConnection as e:
     print('Connection not allowed with HTTP code {}.'.format(e.status))

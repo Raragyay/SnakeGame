@@ -49,5 +49,12 @@ websites = {
         'header': 'h3',
         'header_class': 'sdc-news-story-grid__headline',
         'baseurl': 'https://news.sky.com/'
+    },
+    'The Guardian': {
+        'block': 'h2',
+        'class_name': 'fc-item__title',
+        'header': 'span',
+        'header_class': 'js-headline-text',
+        'baseurl': 'https://www.theguardian.com'
     }
 }
