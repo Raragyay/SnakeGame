@@ -42,15 +42,17 @@ urls = {
     'Sky News': 'https://news.sky.com/',
     'The Guardian': 'https://www.theguardian.com/international'
 }
-try:
-    threads = []
-    for key in urls:
-        threads.append(threading.Thread(target=check_news_site, args=(key,)))
-    for index, thread in enumerate(threads):
-        thread.start()
+
+threads = []
+for key in urls:
+    threads.append(threading.Thread(target=check_news_site, args=(key,)))
+for index, thread in enumerate(threads):
+    try:
         print('Started thread {}'.format(index + 1))
-    for thread in threads:
+        thread.start()
+    except DisallowedConnection as e:
+        print('Connection not allowed with HTTP code {}.'.format(e.status))
+for thread in threads:
+    if thread.is_alive():
         thread.join()
-    print('Exiting Main Thread.')
-except DisallowedConnection as e:
-    print('Connection not allowed with HTTP code {}.'.format(e.status))
+print('Exiting Main Thread.')
