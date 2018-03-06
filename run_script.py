@@ -9,7 +9,7 @@ from urlconnection import soupify
 
 def check_news_site(sitename):
     """
-    Check BBC for news stories
+    Check the news sites for news stories. Of course, the condition has to be that they are in the url list.
     :param sitename: The site name. Used to initiate the whole process.
     :return: Absolutely nothing. It'll write the stuff to a file.
     """
@@ -24,11 +24,22 @@ def check_news_site(sitename):
 
 
 def dumper(stories, filename):
+    """
+    JSON Dumps all the info into a file.
+    :param stories: A dictionary {headline:link}, which will be dumped away.
+    :param filename: The filename to access. This is just the site name.
+    :return: Nothing. It just dumps it away.
+    """
     with open('{}.txt'.format(filename), 'w') as out:
-        json.dump(stories, out)
+        json.dump(stories, out, indent=4)
 
 
 def loader(filename):
+    """
+    Loads all the info that was previously dumped into a dictionary {headline:link}
+    :param filename: The file name. Also known as the site name.
+    :return:
+    """
     try:
         with open('{}.txt'.format(filename), 'r') as read:
             stories = json.load(read)
