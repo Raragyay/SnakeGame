@@ -2,6 +2,42 @@ import pprint
 
 from urlconnection import soupify
 import datetime
+import pandas as pd
+
+
+def get_game_stats(game):
+    """
+    Gets all the stats for the game This includes the name of the team and the score.
+    :param game: TODO
+    :return: TODO
+    """
+    df = pd.read_html(str(game), flavor='bs4')[0]
+    df.rename(columns=lambda x: x.strip(), inplace=True)
+    df.rename(columns={'': 'Teams'}, inplace=True)
+    teamnames = df.Teams.values
+    for i, team in enumerate(teamnames):
+        teamnames[i] = ' '.join([i for i in team.split() if i.lower().islower()])
+    df.Teams = teamnames
+    return df
+
+
+def give_wins(winner, loser, dictionary):
+    """
+    This function adds the correct winners and losers.
+    :param winner:
+    :param loser:
+    :param dictionary:
+    :return:
+    """
+    try:
+        dictionary[winner]['wins'] += 1
+    except KeyError:
+        dictionary[winner] = {'wins': 1, 'losses': 0}
+    try:
+        dictionary[loser]['losses'] += 1
+    except KeyError:
+        dictionary[loser] = {'wins': 0, 'losses': 1}
+    return dictionary
 
 
 def basketball_processor(soup, dictionary):
@@ -13,29 +49,17 @@ def basketball_processor(soup, dictionary):
     :return: DataFrame
     """
     teams = dictionary.copy()
-    for teamname in soup.find_all('a', class_='team'):
-        if teamname.text not in teams:
-            teams[teamname.text] = {'wins': 0, 'losses': 0}
-    print(teams)
     games = soup.select('div.single-score-card.postgame')
-    win_loss = {}
     for game in games:
-        if game.find('div', class_='game-status postgame').text.strip() != 'FINAL':
-            continue
-        scoretable = game.find('tbody')
-        team_1, team_2 = scoretable.find_all('tr', limit=2)
-        team_1_name = team_1.find('a', class_='team').text
-        team_2_name = team_2.find('a', class_='team').text
-        team_1_score = int(team_1.find_all('td')[3].text)
-        team_2_score = int(team_2.find_all('td')[3].text)
+        df = get_game_stats(game)
+        team_1_score = df.iloc[0, -1]
+        team_2_score = df.iloc[1, -1]
         if team_1_score > team_2_score:
-            teams[team_1_name]['wins'] += 1
-            teams[team_2_name]['losses'] += 1
-        else:
-            teams[team_1_name]['losses'] += 1
-            teams[team_2_name]['wins'] += 1
-        print(team_1_name, team_1_score)
-        print(team_2_name, team_2_score)
+            teams = give_wins(df.Teams[0], df.Teams[1], teams)
+        elif team_1_score < team_2_score:
+            teams = give_wins(df.Teams[1], df.Teams[0], teams)
+        print(df)
+        # teams=get_game_stats(game,teams)
     return teams
     # teams = {i.text: {} for i in set(teamnames) if i.text}
     # The dictionary is used to calculate the wins and losses against other teams.
@@ -48,15 +72,19 @@ def basketball_processor(soup, dictionary):
     # return regions
 
 
-start_date = datetime.date(2018, 3, 5)
+print('15-12'.islower())
+start_date = datetime.date(2018, 2, 13)
 num_of_days = 30
 winloss = {}
 print(start_date)
-for i in range(num_of_days):
-    winloss = basketball_processor(
-        soupify('https://www.cbssports.com/college-basketball/scoreboard/all/{}'.format(start_date.strftime('%Y%m%d'))),
-        winloss)
-    start_date -= datetime.timedelta(days=1)
+winloss = basketball_processor(
+    soupify('https://www.cbssports.com/college-basketball/scoreboard/all/{}'.format(start_date.strftime('%Y%m%d'))),
+    winloss)
+# for i in range(num_of_days):
+#    winloss = basketball_processor(
+#        soupify('https://www.cbssports.com/college-basketball/scoreboard/all/{}'.format(start_date.strftime('%Y%m%d'))),
+#        winloss)
+#    start_date -= datetime.timedelta(days=1)
 
 pprint.pprint(winloss)
 # https://www.cbssports.com/college-basketball/scoreboard/all/DATE
