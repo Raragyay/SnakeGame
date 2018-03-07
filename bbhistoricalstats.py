@@ -59,36 +59,18 @@ def basketball_processor(soup, dictionary):
         elif team_1_score < team_2_score:
             teams = give_wins(df.Teams[1], df.Teams[0], teams)
         print(df)
-        # teams=get_game_stats(game,teams)
     return teams
-    # teams = {i.text: {} for i in set(teamnames) if i.text}
-    # The dictionary is used to calculate the wins and losses against other teams.
-    # return teams
-
-    # regions=tournament.find_all('li',{'class':'region'})
-    # teams={}
-    # for region in regions:
-
-    # return regions
 
 
 print('15-12'.islower())
-start_date = datetime.date(2018, 2, 13)
+start_date = datetime.date(2018, 3, 5)
 num_of_days = 30
 winloss = {}
 print(start_date)
-winloss = basketball_processor(
-    soupify('https://www.cbssports.com/college-basketball/scoreboard/all/{}'.format(start_date.strftime('%Y%m%d'))),
-    winloss)
-# for i in range(num_of_days):
-#    winloss = basketball_processor(
-#        soupify('https://www.cbssports.com/college-basketball/scoreboard/all/{}'.format(start_date.strftime('%Y%m%d'))),
-#        winloss)
-#    start_date -= datetime.timedelta(days=1)
+for i in range(num_of_days):
+    winloss = basketball_processor(
+        soupify('https://www.cbssports.com/college-basketball/scoreboard/all/{}'.format(start_date.strftime('%Y%m%d'))),
+        winloss)
+    start_date -= datetime.timedelta(days=1)
 
 pprint.pprint(winloss)
-# https://www.cbssports.com/college-basketball/scoreboard/all/DATE
-# Sample link for now: https://www.cbssports.com/college-basketball/scoreboard/all/20180305
-# postgame divs, get FIRST table
-# Get the two team names, perhaps match them, but if that doesn't work, get the team link profile
-# Two rows for the teams
