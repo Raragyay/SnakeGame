@@ -1,5 +1,6 @@
 import pprint
 
+from jsoninterchange import loader, dumper
 from urlconnection import soupify
 import datetime
 import pandas as pd
@@ -40,7 +41,7 @@ def give_wins(winner, loser, dictionary):
     return dictionary
 
 
-def basketball_processor(soup, dictionary):
+def basketball_win_loss(soup, dictionary):
     """
     Plan: To get all match data from past games, including win percentage, individual matchups, and perhaps tournament performance.
     This will involve going through the scoreboards for all past college games
@@ -51,6 +52,9 @@ def basketball_processor(soup, dictionary):
     teams = dictionary.copy()
     games = soup.select('div.single-score-card.postgame')
     for game in games:
+        if 'FINAL' not in game.find('div', class_='game-status').text.strip():
+            continue
+        # print(game_status)
         df = get_game_stats(game)
         team_1_score = df.iloc[0, -1]
         team_2_score = df.iloc[1, -1]
@@ -62,15 +66,22 @@ def basketball_processor(soup, dictionary):
     return teams
 
 
-print('15-12'.islower())
-start_date = datetime.date(2018, 3, 5)
-num_of_days = 30
-winloss = {}
-print(start_date)
-for i in range(num_of_days):
-    winloss = basketball_processor(
-        soupify('https://www.cbssports.com/college-basketball/scoreboard/all/{}'.format(start_date.strftime('%Y%m%d'))),
-        winloss)
-    start_date -= datetime.timedelta(days=1)
+def process_n_days(days, start):
+    """
+    Processes the data from basketball_win_loss for n amount of days. This
+    :param days:
+    :return:
+    """
+    dictionary = loader('W/L')
+    start_date = start
+    for i in range(days):
+        dictionary = basketball_win_loss(
+            soupify(
+                'https://www.cbssports.com/college-basketball/scoreboard/all/{}'.format(start_date.strftime('%Y%m%d'))),
+            dictionary)
+        start_date -= datetime.timedelta(days=1)
+    pprint.pprint(dictionary)
+    dumper(dictionary, 'W/L')
 
-pprint.pprint(winloss)
+
+process_n_days(30, datetime.date(2018, 3, 6))
