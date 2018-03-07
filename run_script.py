@@ -1,8 +1,7 @@
 import time
 import newsprocessor as dp
-import json
 import threading
-
+import jsoninterchange
 from custom_exceptions import DisallowedConnection
 from urlconnection import soupify
 
@@ -15,37 +14,12 @@ def check_news_site(sitename):
     """
     delay = 10
     maxcount = 5
-    stories = loader(sitename)
+    stories = jsoninterchange.loader(sitename)
     for i in range(maxcount):
         print('Checking {} {}'.format(sitename, i + 1))
         dp.news_scraper(soupify(urls[sitename]), sitename, stories)
         time.sleep(delay)
-    dumper(stories, sitename)
-
-
-def dumper(stories, filename):
-    """
-    JSON Dumps all the info into a file.
-    :param stories: A dictionary {headline:link}, which will be dumped away.
-    :param filename: The filename to access. This is just the site name.
-    :return: Nothing. It just dumps it away.
-    """
-    with open('{}.txt'.format(filename), 'w') as out:
-        json.dump(stories, out, indent=4)
-
-
-def loader(filename):
-    """
-    Loads all the info that was previously dumped into a dictionary {headline:link}
-    :param filename: The file name. Also known as the site name.
-    :return:
-    """
-    try:
-        with open('{}.txt'.format(filename), 'r') as read:
-            stories = json.load(read)
-    except (json.decoder.JSONDecodeError, FileNotFoundError):
-        return {}
-    return stories
+    jsoninterchange.dumper(stories, sitename)
 
 
 urls = {
