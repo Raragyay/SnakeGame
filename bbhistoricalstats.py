@@ -68,11 +68,11 @@ def basketball_win_loss(soup, dictionary):
 
 def process_n_days(days, start):
     """
-    Processes the data from basketball_win_loss for n amount of days. This
+    Processes the data from basketball_win_loss for n amount of days. This is then dumped into a file called W/L.txt
     :param days:
     :return:
     """
-    dictionary = loader('W/L')
+    dictionary = loader('Basketball_W_L')
     start_date = start
     for i in range(days):
         dictionary = basketball_win_loss(
@@ -81,7 +81,7 @@ def process_n_days(days, start):
             dictionary)
         start_date -= datetime.timedelta(days=1)
     pprint.pprint(dictionary)
-    dumper(dictionary, 'W/L')
+    dumper(dictionary, 'Basketball_W_L')
 
 
 process_n_days(30, datetime.date(2018, 3, 6))
