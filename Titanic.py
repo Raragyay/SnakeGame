@@ -80,5 +80,4 @@ class Passenger:
 
 titanic = Titanic()
 titanic.fill_boat('http://www.titanicfacts.net/titanic-passenger-list.html')
-# pprint.pprint(titanic)
 titanic.analyze_survival_rate('Age', 'Class')
